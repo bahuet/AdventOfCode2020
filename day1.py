@@ -22,8 +22,8 @@ def part1():
 def part2():
     data = get_input()
     data_set = set(data)
-    for numi in data:
-        for numj in data[1:]:
+    for i, numi in enumerate(data):
+        for numj in data[i:]:
             goal =  2020 - (numi + numj)
             if goal in data_set:
                 return numi * numj * goal
