@@ -2,8 +2,7 @@ import os.path
 
 
 def get_input():
-    input_path = os.path.join('inputs', 'day1-input.txt')
-
+    input_path = os.path.join('inputs', '1.txt')
     f = open(input_path, 'r')
     data = f.read().split('\n')
     data.pop()

@@ -14,7 +14,7 @@ FIELDS_REGEX_RULES = {
 
 
 def get_input():
-    input_path = os.path.join('inputs', 'day4-input.txt')
+    input_path = os.path.join('inputs', '4.txt')
     f = open(input_path, 'r')
     data = f.read().split('\n\n')
     return data

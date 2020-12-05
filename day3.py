@@ -4,7 +4,7 @@ from functools import reduce
 
 
 def get_input():
-    input_path = os.path.join('inputs', 'day3-input.txt')
+    input_path = os.path.join('inputs', '3.txt')
     f = open(input_path, 'r')
     data = f.read().split('\n')
     data.pop()
