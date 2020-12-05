@@ -9,7 +9,7 @@ FIELDS_REGEX_RULES = {
     "hgt": '^(?:(?:1[5-8][0-9]|19[0-3])cm)$|^(?:(?:59|6[0-9]|7[0-6])in)$',
     "hcl": '^#[a-f0-9]{6}$',
     "ecl": 'amb|blu|brn|gry|grn|hzl|oth',
-    "pid": '^\d{9}$'
+    "pid": r'^\d{9}$'
 }
 
 
