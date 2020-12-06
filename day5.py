@@ -39,8 +39,6 @@ def part2(boarding_passes):
             return sorted_seatid_list[i - 1] + 1
     return None
 
-#740 too high
-
 if __name__ == '__main__':
     input_data = get_input()
     print(part1(input_data))
