@@ -39,23 +39,34 @@ def part1(data):
     bags = parse_bag_rules(data)
     containers = set()
     queue = set(['shiny gold'])
-    counter = 0
     while len(queue) > 0:
         newqueue = set()
         for bag, subbags in bags.items():
             # subbags_set is the set of bags that this bag can carry
             subbags_set = set([subbag[1] for subbag in subbags])
-            # Some bags are in
             if len(queue & subbags_set) > 0:
                 newqueue.add(bag)
         containers |= newqueue
         queue = newqueue
-    return len(containers )
-
+    return len(containers)
 
 
 def part2(data):
-    pass
+    bags = parse_bag_rules(data)
+    return recurbags('shiny gold', bags, 0)
+
+
+def recurbags(bag, bags, count):
+    if bag not in bags:
+        # we should never reach this I think
+        return count
+    else:
+        counter = 0
+        for b in bags[bag]:
+            times = int(b[0])
+            sub_bag = b[1]
+            counter += times * (1 + recurbags(sub_bag, bags, count))
+        return counter
 
 
 if __name__ == '__main__':
