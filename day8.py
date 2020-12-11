@@ -113,5 +113,5 @@ def part2(data):
 
 if __name__ == '__main__':
     input_data = get_input(8)
-    # print(part1(input_data))
+    print(part1(input_data))
     print(part2(input_data))
