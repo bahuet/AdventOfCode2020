@@ -1,8 +1,6 @@
 import os.path
-from time import sleep
 
 enums = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
-
 
 def get_input(day, bTest=False):
     filename = str(day) + ('test' if bTest else '') + '.txt'
