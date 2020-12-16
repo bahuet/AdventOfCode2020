@@ -1,4 +1,6 @@
 import os.path
+from math import gcd
+from itertools import count
 
 
 def get_input(day, bTest=False):
@@ -32,12 +34,26 @@ def part1(data):
             lowest_depart_ts = depart_ts
     return lowest_id * (lowest_depart_ts - data['ts'])
 
-# 774995113 too high
+
+def lcm(a, b):
+    return a * b // gcd(a, b)
+
+
 def part2(data):
-    pass
+    # 0 == t%id1 == (t+1)%id2 == (t+3)%id3...
+    ids = [(i, x) for i, x in enumerate(data['ids']) if x != 'x']
+    t = 0
+    step = 1
+    for delta, idn in ids:
+        for t in count(t, step):
+            if (t+delta) % idn == 0:
+                break
+        step = lcm(step, idn)
+
+    return t
 
 
 if __name__ == '__main__':
-    input_data= get_input(13, False)
+    input_data = get_input(13, False)
     print(part1(input_data))
     print(part2(input_data))
