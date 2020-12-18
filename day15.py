@@ -33,7 +33,7 @@ def part1(data):
 
 
 def part2(data):
-    pass
+    return get_nth_number(30000000, data)
 
 
 if __name__ == '__main__':
