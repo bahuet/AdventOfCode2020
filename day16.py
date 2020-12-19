@@ -28,8 +28,25 @@ def parse_data(lines):
     return rules, my_ticket, nearby_tickets
 
 
+def value_is_valid(value, scopes):
+    for scope in scopes:
+        if scope[0] <= value <= scope[1]:
+            return True
+    return False
+
+
 def part1(data):
-    pass
+    rules, _, all_tickets = data
+    all_rules = []
+    ticket_scanning_error_rate = 0
+    for local_rules in rules.values():
+        all_rules.extend(local_rules)
+
+    def not_valid(v):
+        return not value_is_valid(v, all_rules)
+    for ticket in all_tickets:
+        ticket_scanning_error_rate += sum([value for value in ticket if not_valid(value)])
+    return ticket_scanning_error_rate
 
 
 def part2(data):
