@@ -17,7 +17,7 @@ def part2(data):
 
 
 if __name__ == '__main__':
-    day = 0
+    DAY = 0
     input_data = get_input(day, False)
     print(part1(input_data))
     print(part2(input_data))
