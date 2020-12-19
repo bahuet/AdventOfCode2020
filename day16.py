@@ -21,7 +21,9 @@ def parse_data(lines):
         rules[match[1]] = [[int(match[2]), int(match[3])], [int(match[4]), int(match[5])]]
 
     my_ticket = [int(x) for x in block_two.split('\n')[1].split(',')]
-    nearby_tickets = [int(x.strip()) for x in re.split('\n|,', block_three.strip().split('\n', 1)[1])]
+
+    nearby_tickets_lines = block_three.strip().split('\n')[1:]
+    nearby_tickets = [list(map(int, nearby_tickets_line.split(','))) for nearby_tickets_line in nearby_tickets_lines]
 
     return rules, my_ticket, nearby_tickets
 
