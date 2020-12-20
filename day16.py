@@ -1,10 +1,9 @@
 import os.path
-import io
 import re
 
 
-def get_input(day, bTest=False):
-    filename = str(day) + ('test' if bTest else '') + '.txt'
+def get_input(day, test=False):
+    filename = str(day) + ('test' if test else '') + '.txt'
     input_path = os.path.join('inputs', filename)
     with open(input_path) as f:
         lines = f.read()
@@ -28,24 +27,34 @@ def parse_data(lines):
     return rules, my_ticket, nearby_tickets
 
 
-def value_is_valid(value, scopes):
-    for scope in scopes:
-        if scope[0] <= value <= scope[1]:
-            return True
+def value_is_within_scope(value, scope):
+    if scope[0] <= value <= scope[1]:
+        return True
     return False
+
+
+def value_valid_for_rule(value, rulename, rules):
+    return any([value_is_within_scope(value, scope) for scope in rules[rulename]])
+
+
+def value_valid_for_atleast_one_rule(value, rules):
+    return any([value_valid_for_rule(value, rulename, rules) for rulename in rules.keys()])
+
+
+def get_tickets_invalid_values(ticket, rules):
+    invalid_values = []
+    for value in ticket:
+        if not value_valid_for_atleast_one_rule(value, rules):
+            invalid_values.append(value)
+    return invalid_values
 
 
 def part1(data):
     rules, _, all_tickets = data
-    all_rules = []
     ticket_scanning_error_rate = 0
-    for local_rules in rules.values():
-        all_rules.extend(local_rules)
 
-    def not_valid(v):
-        return not value_is_valid(v, all_rules)
     for ticket in all_tickets:
-        ticket_scanning_error_rate += sum([value for value in ticket if not_valid(value)])
+        ticket_scanning_error_rate += sum(get_tickets_invalid_values(ticket, rules))
     return ticket_scanning_error_rate
 
 
@@ -56,6 +65,6 @@ def part2(data):
 if __name__ == '__main__':
     DAY = 16
     input_data = get_input(DAY, False)
-    data = parse_data(input_data)
-    print(part1(data))
-    print(part2(data))
+    parsed_data = parse_data(input_data)
+    print(part1(parsed_data))
+    print(part2(parsed_data))
