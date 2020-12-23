@@ -12,46 +12,57 @@ def get_input(day, bTest=False):
 
 def init_next_cube(cube):
     new_cube = {}
+
     new_cube_min_z = min(cube.keys()) - 1
     new_cube_max_z = max(cube.keys()) + 1
     new_cube_h = len(cube[0]) + 2
     new_cube_w = len(cube[0][0]) + 2
 
-    for z in range(new_cube_min_z, new_cube_max_z + 1):
+    z_range = range(new_cube_min_z, new_cube_max_z + 1)
+    y_range = range(new_cube_h)
+    x_range = range(new_cube_w)
+
+    for z in z_range:
         new_cube[z] = []
-        for y in range(new_cube_h):
+        for _ in y_range:
             new_cube[z].append([False] * new_cube_w)
-    return new_cube
+    return new_cube, z_range, y_range, x_range
 
 
-def next_state_is_active(x, y, z, cube):
+def get_points_info(x, y, z, cube):
+    active_neighbours_count = 0
     point_is_active = False
-    neighbours_active = 0
-    next_state_active = False
-    for z_probe in range(z-1, z+2):
-        for y_probe in range(y-1, y+2):
-            for x_probe in range(x-1, x+2):
+    probing_range = range(-1, 2)
+    probing_range2 = range(0, 3)
+    for i in probing_range:
+        z_probe = z + i
+        for j in probing_range2:
+            y_probe = y + j
+            for k in probing_range2:
+                x_probe = x + k
                 try:
                     if cube[z_probe][y_probe][x_probe]:
                         if z_probe == z and y_probe == y and x_probe == x:
                             point_is_active = True
                         else:
-                            neighbours_active += 1
+                            active_neighbours_count += 1
                 except (KeyError, IndexError):
                     pass
+    return active_neighbours_count, point_is_active
 
-    if neighbours_active == 3 or (point_is_active and neighbours_active == 2):
-        next_state_active = True
-    return next_state_active
+
+def next_state_is_active(x, y, z, cube):
+    active_neighbours_count, point_is_active = get_points_info(x, y, z, cube)
+
+    if active_neighbours_count == 3 or (active_neighbours_count == 2 and point_is_active):
+        return True
+    else:
+        return False
 
 
 def get_next_cube(cube):
     active_count = 0
-    next_cube = init_next_cube(cube)
-    # TODO recuperer ces infos depuis init_next_cube plutot 
-    z_range = range(min(next_cube.keys()), max(next_cube.keys()) + 1)
-    y_range = range(len(next_cube[0]))
-    x_range = range(len(next_cube[0][0]))
+    next_cube, z_range, y_range, x_range = init_next_cube(cube)
 
     for z in z_range:
         for y in y_range:
@@ -65,9 +76,9 @@ def get_next_cube(cube):
 
 def part1(initial_slice):
     cube = {0: initial_slice}
-    for i in range(1):
+    for _ in range(1):
         active_count, next_cube = get_next_cube(cube)
-        print(next_cube)
+        print(next_cube[0])
         cube = next_cube
     return active_count
 
