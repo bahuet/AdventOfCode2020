@@ -83,13 +83,25 @@ def part1(initial_slice):
         cube = next_cube
     return active_count
 
+def init_next_hypercube():
+    # add w loop to previous existing fn, can it be reused?
+    pass
+
+def get_hypercube_neighbor_count_map():
+    # build a neighbor map instead of checking state (variation), add a loop
+    pass
+
+def next_hypercube_state_is_active():
+    # just check current status and neigbor count
+    pass
 
 def part2(initial_slice):
+    # loop through hypercube iterations
     pass
 
 
 if __name__ == '__main__':
     DAY = 17
-    input_data = get_input(DAY, False)
+    input_data = get_input(DAY, True)
     print(part1(input_data))
     print(part2(input_data))
