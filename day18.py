@@ -1,4 +1,5 @@
 import os.path
+from functools import reduce
 
 
 def get_input(day, bTest=False):
@@ -40,8 +41,6 @@ def parse_line(line):
 def op(operator, a, b):
     if operator == '+':
         return a + b
-    if operator == '-':
-        return a - b
     if operator == '*':
         return a * b
 
@@ -60,7 +59,7 @@ def get_expression_result(expression):
             else:
                 # First number in the line
                 curr_value = item
-        elif item in '+-*':
+        elif item in '+*':
             current_operation = item
     return curr_value
 
@@ -72,8 +71,35 @@ def part1(data):
     return acc
 
 
+def get_expression_result_addfirst(expression):
+    new_expression = []
+
+    loaded_num = 0
+    has_loaded_add = False
+    for item in expression:
+        if isinstance(item, list):
+            item = get_expression_result_addfirst(item)
+        if isinstance(item, int):
+            if loaded_num and has_loaded_add:
+                loaded_num += item
+                has_loaded_add = False
+            else:
+                loaded_num = item
+        elif item == '*':
+            new_expression.append(loaded_num)
+            has_loaded_add = False
+        elif item == '+':
+            has_loaded_add = True
+    if loaded_num:
+        new_expression.append(loaded_num)
+    return reduce((lambda a, b: a * b), new_expression)
+
+
 def part2(data):
-    pass
+    acc = 0
+    for line in data:
+        acc += get_expression_result_addfirst(parse_line(line))
+    return acc
 
 
 if __name__ == '__main__':
