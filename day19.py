@@ -10,35 +10,43 @@ def get_input(day, bTest=False):
         return rules.splitlines(), messages.splitlines()
 
 
-def parse_rules(rules_raw):
+def parse_rules(rules_data):
     rules = {}
-    rule_num_reg = r'^(\d+):\s(.+)'
-    char_reg = '"([a-zA-Z])"'
-    two_rules_reg = r'(\d+)\s(\d+)'
-    rules_set = two_rules_reg + '(?:' + r'\s\|\s' + two_rules_reg + ')?'
-    for rule_raw in rules_raw:
-        match = re.search(rule_num_reg, rule_raw)
-        num = int(match[1])
-        rules[num] = {}
-        letter_match = re.search(char_reg, match[2])
-        value_match = re.search(rules_set, match[2])
-        if letter_match:
-            rules[num]['type'] = 'val'
-            rules[num]['data'] = letter_match[1]
-        elif value_match:
-            rules[num]['type'] = 'ref'
-            rules[num]['data'] = [[value_match[1], value_match[2]]]
-            if value_match[3]:
-                second_list = [value_match[3]]
-                if value_match[4]:
-                    second_list.append(value_match[4])
-                rules[num]['data'].append(second_list)
+    for line in rules_data:
+        ruleid, options = line.split(': ')
+        ruleid = int(ruleid)
+
+        if '"' in options:
+            rule = options[1: -1]
+        else:
+            rule = []
+            for option in options.split(' | '):
+                rule.append(tuple(map(int, option.split())))
+        rules[ruleid] = rule
     return rules
+
+
+def build_regexep(rules, rulenum=0):
+    rule = rules[rulenum]
+    if isinstance(rule, str):
+        return rule
+    options = []
+    for opt_tuble in rule:
+        opt_str = ''
+        for sub_rule in opt_tuble:
+            opt_str += build_regexep(rules, sub_rule)
+        options.append(opt_str)
+    return '(' + '|'.join(options) + ')'
 
 
 def part1(rules_data, messages):
     rules = parse_rules(rules_data)
-    print('123')
+    reg = re.compile('^' + build_regexep(rules) + '$')
+    valid = 0
+    for msg in messages:
+        if reg.match(msg):
+            valid += 1
+    return valid
 
 
 def part2(rules_data, messages_data):
