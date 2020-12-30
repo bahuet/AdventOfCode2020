@@ -49,8 +49,41 @@ def part1(rules_data, messages):
     return valid
 
 
-def part2(rules_data, messages_data):
-    pass
+def build_regexep2(rules, rulenum=0, max_mess_len=100):
+    # // special case override start
+    if rulenum == 8:
+        return '(' + build_regexep2(rules, 42, max_mess_len) + ')+'
+    if rulenum == 11:
+        r42 = build_regexep2(rules, 42, max_mess_len)
+        r31 = build_regexep2(rules, 31, max_mess_len)
+        # how to do this
+        r11_list = []
+        for n in range(1, int(max_mess_len/2)):
+            r11_list.append(f'{r42}{{{n}}}{r31}{{{n}}}')
+        return '(' + '|'.join(r11_list) + ')'
+    # // special case override end
+    # 429 is wrong, why ? A: range has to start at 1, not 0.
+
+    rule = rules[rulenum]
+    if isinstance(rule, str):
+        return rule
+    options = []
+    for opt_tuble in rule:
+        opt_str = ''
+        for sub_rule in opt_tuble:
+            opt_str += build_regexep2(rules, sub_rule, max_mess_len)
+        options.append(opt_str)
+    return '(' + '|'.join(options) + ')'
+
+
+def part2(rules_data, messages):
+    rules = parse_rules(rules_data)
+    reg = re.compile('^' + build_regexep2(rules, 0,  max(len(m) for m in messages)) + '$')
+    valid = 0
+    for msg in messages:
+        if reg.match(msg):
+            valid += 1
+    return valid
 
 
 if __name__ == '__main__':
