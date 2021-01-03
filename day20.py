@@ -29,6 +29,10 @@ def get_tile_patterns(tile):
     return [top_pattern, right_pattern, bot_pattern, left_pattern]
 
 
+def get_active_tile_patterns(tile, patterns_tiles):
+    return remove_unique_patterns(get_tile_patterns(tile), patterns_tiles)
+
+
 def build_tiles_sides_patterns(tiles):
     tiles_sides_patterns = {}
     for tileid, tile in tiles.items():
@@ -60,13 +64,16 @@ def get_patterns_tiles(tiles_sides_patterns):
     return patterns_tiles
 
 
-def remove_unique_patterns_inplace(tiles_sides_patterns, patterns_tiles):
-    for tile_patterns in tiles_sides_patterns.values():
-        for pat_idx, pattern in enumerate(tile_patterns):
-            # side is unique
-            if len(patterns_tiles[get_pattern_universal_num_value(pattern)]) == 1:
-                tile_patterns[pat_idx] = None
-    return tiles_sides_patterns
+def pattern_is_unique(pattern, patterns_tiles):
+    return len(patterns_tiles[get_pattern_universal_num_value(pattern)]) == 1
+
+
+def remove_unique_patterns(tile_patterns, patterns_tiles):
+    for pat_idx, pattern in enumerate(tile_patterns):
+        # side is unique
+        if pattern_is_unique(pattern, patterns_tiles):
+            tile_patterns[pat_idx] = None
+    return tile_patterns
 
 
 def get_corners(tiles_sides_patterns):
@@ -82,7 +89,8 @@ def part1(data):
     tiles = parse_input(data)
     tiles_sides_patterns = build_tiles_sides_patterns(tiles)
     patterns_tiles = get_patterns_tiles(tiles_sides_patterns)
-    tiles_sides_patterns = remove_unique_patterns_inplace(tiles_sides_patterns, patterns_tiles)
+    for tile_patterns in tiles_sides_patterns.values():
+        remove_unique_patterns(tile_patterns, patterns_tiles)
     corners = get_corners(tiles_sides_patterns)
     return reduce(lambda x, y: x*y, corners)
 
@@ -91,7 +99,7 @@ def rotate_tile(m):
     return [[m[j][i] for j in range(len(m))] for i in range(len(m[0])-1, -1, -1)]
 
 
-def flip_tile(axis, m):
+def flip_tile(m, axis):
     tempm = m.copy()
     if axis == 0:
         for i in range(0, len(tempm), 1):
@@ -113,6 +121,7 @@ def get_adapted_tile(pattern, position, tile):
     tile_patterns = get_tile_patterns(tile)
     pat_pos_on_tile, needs_flipping = get_pat_pos_on_tile(pattern, tile_patterns)
 
+    #fix HERE
     while (pat_pos_on_tile-2) % 4 != position:
         tile = rotate_tile(tile)
         pat_pos_on_tile, needs_flipping = get_pat_pos_on_tile(pattern, tile_patterns)
@@ -123,7 +132,7 @@ def get_adapted_tile(pattern, position, tile):
 
 
 def part2(data):
-    monster = '''                  # 
+    monster = '''                  #
 #    ##    ##    ###
  #  #  #  #  #  #   '''
     # todo:
@@ -131,14 +140,35 @@ def part2(data):
     tiles = parse_input(data)
     tiles_sides_patterns = build_tiles_sides_patterns(tiles)
     patterns_tiles = get_patterns_tiles(tiles_sides_patterns)
-    tiles_sides_patterns = remove_unique_patterns_inplace(tiles_sides_patterns, patterns_tiles)
+    for tile_patterns in tiles_sides_patterns.values():
+        remove_unique_patterns(tile_patterns, patterns_tiles)
     corners = get_corners(tiles_sides_patterns)
+
     # make a new matrix with all the tiles connected and rotated:
     # take a corner and rotate it until its active sides are to the right and bottom (topleft corner)
     # use that to set all the x == 0 tiles
     # then do all the lines all by one
+    image_matrix = [[None] * 12 for _ in range(12)]
+    topleft_tile_id = corners[0]
+    topleft_tile = tiles[topleft_tile_id]
+
+    topleft_tile_patterns = get_active_tile_patterns(topleft_tile, patterns_tiles)
+    while topleft_tile_patterns[1] is None and topleft_tile_patterns[2] is None:
+        print(topleft_tile_patterns)
+        topleft_tile = rotate_tile(topleft_tile)
+        topleft_tile_patterns = get_active_tile_patterns(topleft_tile, patterns_tiles)
+    image_matrix[0][0] = {'tileid': topleft_tile_id, 'tile': topleft_tile}
+
+    for y in range(1, 12):
+        print(y)
+        uppertile_dict = image_matrix[y - 1][0]
+        upper_tile_bot_pattern = get_tile_patterns(uppertile_dict['tile'])[2]
+        upper_tile_bot_univ_num = get_pattern_universal_num_value(upper_tile_bot_pattern)
+        current_tileid = next(v for v in patterns_tiles[upper_tile_bot_univ_num] if v != uppertile_dict['tileid'])
+        image_matrix[y][0] = {'tileid': current_tileid,
+                              'tile': get_adapted_tile(upper_tile_bot_pattern, 2, tiles[current_tileid])}
     # fuse is all together in one big string, remove the borders
-    # then, do a monster pattern scan for all 4 orientations and their 4 mirror images on the entire image
+    # then, do a monster pattern scan for all 4 orientations and their 4 flipped mirror images on the entire image
     # (because we cannot know if we have to correct orientation or side)
     # is it possible that monster patterns overlap ?
     # if not, we can just count the number of '#' in the pattern and add them up
