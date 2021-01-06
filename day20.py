@@ -113,7 +113,7 @@ def get_pat_pos_on_tile(pattern, tile_patterns):
     pattern_univ = get_pattern_universal_num_value(pattern)
     for i, pat in enumerate(tile_patterns):
         if get_pattern_universal_num_value(pat) == pattern_univ:
-            return i, pat != pattern
+            return i, pat == pattern
 
 
 def get_adapted_tile(pattern, position, tile):
@@ -154,17 +154,19 @@ def part2(data):
     topleft_tile = tiles[topleft_tile_id]
 
     topleft_tile_patterns = get_active_tile_patterns(topleft_tile, patterns_tiles)
-    while topleft_tile_patterns[1] is None and topleft_tile_patterns[2] is None:
+    while 1:
         print(topleft_tile_patterns)
         topleft_tile = rotate_tile(topleft_tile)
         topleft_tile_patterns = get_active_tile_patterns(topleft_tile, patterns_tiles)
+        if topleft_tile_patterns[1] and topleft_tile_patterns[2]:
+            break
     image_matrix[0][0] = {'tileid': topleft_tile_id, 'tile': topleft_tile}
 
     for y in range(1, 12):
-        uppertile_dict = image_matrix[y - 1][0]
-        upper_tile_bot_pattern = get_tile_patterns(uppertile_dict['tile'])[2]
+        upper_tile_dict = image_matrix[y - 1][0]
+        upper_tile_bot_pattern = get_tile_patterns(upper_tile_dict['tile'])[2]
         upper_tile_bot_univ_num = get_pattern_universal_num_value(upper_tile_bot_pattern)
-        current_tileid = next(v for v in patterns_tiles[upper_tile_bot_univ_num] if v != uppertile_dict['tileid'])
+        current_tileid = next(v for v in patterns_tiles[upper_tile_bot_univ_num] if v != upper_tile_dict['tileid'])
         image_matrix[y][0] = {'tileid': current_tileid,
                               'tile': get_adapted_tile(upper_tile_bot_pattern, 2, tiles[current_tileid])}
     for x in range(1, 12):
@@ -172,7 +174,7 @@ def part2(data):
             left_tile_dict = image_matrix[y][x - 1]
             left_tile_right_pattern = get_tile_patterns(left_tile_dict['tile'])[1]
             left_tile_right_univ_num = get_pattern_universal_num_value(left_tile_right_pattern)
-            current_tileid = next(v for v in patterns_tiles[left_tile_right_univ_num] if v != uppertile_dict['tileid'])
+            current_tileid = next(v for v in patterns_tiles[left_tile_right_univ_num] if v != left_tile_dict['tileid'])
             image_matrix[y][x] = {'tileid': current_tileid,
                                   'tile': get_adapted_tile(left_tile_right_pattern, 1, tiles[current_tileid])}
 
