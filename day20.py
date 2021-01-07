@@ -179,6 +179,13 @@ def part2(data):
                                   'tile': get_adapted_tile(left_tile_right_pattern, 1, tiles[current_tileid])}
 
     # fuse is all together in one big string, remove the borders
+    main_string = ''
+    for line in image_matrix:
+        for tile_dict in line:
+            tile = tile_dict['tile']
+            for i in range(1, len(tile) - 1):
+                    main_string += ''.join(tile[i][1:-1])
+        main_string += '\n'
     # then, do a monster pattern scan for all 4 orientations and their 4 flipped mirror images on the entire image
     # (because we cannot know if we have to correct orientation or side)
     # is it possible that monster patterns overlap ?
