@@ -133,9 +133,10 @@ def get_adapted_tile(pattern, position, tile):
 
 
 def part2(data):
+
     monster = '''                  #
-#    ##    ##    ###
- #  #  #  #  #  #   '''
+    #    ##    ##    ###
+    #  #  #  #  #  #   '''
     # todo:
     # build a dict with tileid:[side patterns], with globally unique patterns set to None
     tiles = parse_input(data)
@@ -178,15 +179,43 @@ def part2(data):
             image_matrix[y][x] = {'tileid': current_tileid,
                                   'tile': get_adapted_tile(left_tile_right_pattern, 1, tiles[current_tileid])}
 
-    # fuse is all together in one big string, remove the borders
-    main_string = ''
+    # fuse is all together in one big list, remove the borders
+    final_image = []
     for line in image_matrix:
-        for tile_dict in line:
+        for tile_index, tile_dict in enumerate(line):
+            final_line = []
             tile = tile_dict['tile']
             for i in range(1, len(tile) - 1):
-                    main_string += ''.join(tile[i][1:-1])
-        main_string += '\n'
+                cleaned_tile_line = tile[i][1:-1]
+                try:
+                    final_index = tile_index * len(cleaned_tile_line) + i - 1
+                    final_image[final_index].extend(cleaned_tile_line)
+                except:
+                    final_image.append(cleaned_tile_line)
+            print(len(final_line))
+    # tile = 10 chars
+    # cleaned_tile = 8 chars
+    # image = 12 x 10
+    # final image =  12 x 8
+    monster_list = [list(line) for line in monster.split('\n')]
+    possible_monsters = []
+    for i in range(4):
+        current_m = monster_list
+        for _ in range(i):
+            current_m = rotate_tile(current_m)
+        possible_monsters.append(current_m)
+        possible_monsters.append(flip_tile(current_m, 0))
+        #possible_monsters.append(flip_tile(current_m, 1))
     # then, do a monster pattern scan for all 4 orientations and their 4 flipped mirror images on the entire image
+
+    def detect_monster(x, y):
+        for m_y in range(len(monster)):
+            for m_x in range(len(monster[m_y])):
+                if monster[m_y][m_x] != final_image[y+m_y][x+m_x]:
+                    return False
+        return True
+    # for line in final_image:
+    #     for
     # (because we cannot know if we have to correct orientation or side)
     # is it possible that monster patterns overlap ?
     # if not, we can just count the number of '#' in the pattern and add them up
