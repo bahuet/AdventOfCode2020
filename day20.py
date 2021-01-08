@@ -134,9 +134,9 @@ def get_adapted_tile(pattern, position, tile):
 
 def part2(data):
 
-    monster = '''                  #
-    #    ##    ##    ###
-    #  #  #  #  #  #   '''
+    monster = '''                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   '''
     # todo:
     # build a dict with tileid:[side patterns], with globally unique patterns set to None
     tiles = parse_input(data)
@@ -205,46 +205,50 @@ def part2(data):
         possible_monsters.append(flip_tile(current_m, 0))
         #possible_monsters.append(flip_tile(current_m, 1))
     # then, do a monster pattern scan for all 4 orientations and their 4 flipped mirror images on the entire image
+    monster_size = len([1 for c in monster if c == '#'])
 
-    def detect_monster(x, y):
+    def detect_monster(x, y, monster, image):
         for m_y in range(len(monster)):
             for m_x in range(len(monster[m_y])):
-                if monster[m_y][m_x] == '#' and final_image[y+m_y][x+m_x] == '#':
+                try:
+                    if monster[m_y][m_x] == '#' and image[y+m_y][x+m_x] != '#':
+                        return False
+                except:
                     return False
+        print('monster at', x, y)
         return True
 
     def get_water_roughness(image):
-        monster_size = len([1 for c in monster if c == '#'])
         monster_count = 0
         sharp_count = 0
         for y, line in enumerate(image):
             for x, _ in enumerate(line):
-                try:
-                    if detect_monster(x, y):
-                        monster_count += 1
-                    else:
-                        if final_image[y][x] == '#':
-                            sharp_count += 1
-                except:
-                    pass
+                found_monster = False
+                for monster in possible_monsters:
+                    if detect_monster(x, y, monster, image):
+                        found_monster = True
+                if found_monster:
+                    monster_count += 1
+                elif image[y][x] == '#':
+                    sharp_count += 1
+
+        print('monster count:', monster_count)
         return sharp_count - monster_count * monster_size
 
-    print(get_water_roughness(final_image))
     # TEST
-    test_image = [list(line) for line in open('inputs/20test_img.txt').read().splitlines()]
-
-    print(get_water_roughness(test_image))
+    #test_image = [list(line) for line in open('inputs/20test_img.txt').read().splitlines()]
+    #print(get_water_roughness(test_image))
 
     # (because we cannot know if we have to correct orientation or side)
     # is it possible that monster patterns overlap ?
     # if not, we can just count the number of '#' in the pattern and add them up
     # if yes, we'll have to do something else, we'll see later
     # gl
-    return
+    # return get_water_roughness(final_image)
 
 
 # 1388 too low
-
+# 2530 too high
 if __name__ == '__main__':
     DAY = 20
     input_data = get_input(DAY, False)
