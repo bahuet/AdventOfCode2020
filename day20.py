@@ -156,7 +156,6 @@ def part2(data):
 
     topleft_tile_patterns = get_active_tile_patterns(topleft_tile, patterns_tiles)
     while 1:
-        print(topleft_tile_patterns)
         topleft_tile = rotate_tile(topleft_tile)
         topleft_tile_patterns = get_active_tile_patterns(topleft_tile, patterns_tiles)
         if topleft_tile_patterns[1] and topleft_tile_patterns[2]:
@@ -192,7 +191,6 @@ def part2(data):
                     final_image[final_index].extend(cleaned_tile_line)
                 except:
                     final_image.append(cleaned_tile_line)
-            print(len(final_line))
     # tile = 10 chars
     # cleaned_tile = 8 chars
     # image = 12 x 10
@@ -211,18 +209,41 @@ def part2(data):
     def detect_monster(x, y):
         for m_y in range(len(monster)):
             for m_x in range(len(monster[m_y])):
-                if monster[m_y][m_x] != final_image[y+m_y][x+m_x]:
+                if monster[m_y][m_x] == '#' and final_image[y+m_y][x+m_x] == '#':
                     return False
         return True
-    # for line in final_image:
-    #     for
+
+    def get_water_roughness(image):
+        monster_size = len([1 for c in monster if c == '#'])
+        monster_count = 0
+        sharp_count = 0
+        for y, line in enumerate(image):
+            for x, _ in enumerate(line):
+                try:
+                    if detect_monster(x, y):
+                        monster_count += 1
+                    else:
+                        if final_image[y][x] == '#':
+                            sharp_count += 1
+                except:
+                    pass
+        return sharp_count - monster_count * monster_size
+
+    print(get_water_roughness(final_image))
+    # TEST
+    test_image = [list(line) for line in open('inputs/20test_img.txt').read().splitlines()]
+
+    print(get_water_roughness(test_image))
+
     # (because we cannot know if we have to correct orientation or side)
     # is it possible that monster patterns overlap ?
     # if not, we can just count the number of '#' in the pattern and add them up
     # if yes, we'll have to do something else, we'll see later
     # gl
-    return 1
+    return
 
+
+# 1388 too low
 
 if __name__ == '__main__':
     DAY = 20
