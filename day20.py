@@ -152,16 +152,18 @@ def get_test_image_matrix():
 def get_final_image(matrix):
     """Remove borders and fuse into one big matrix"""
     final_image = []
-    for line in matrix:
-        for tile_index, tile_dict in enumerate(line):
-            tile = tile_dict['tile']
-            for i in range(1, len(tile) - 1):
-                cleaned_tile_line = tile[i][1:-1]
+    # matrix is a list of list of tiles.
+    # a tile is also a list of list.
+    for tile_y, list_of_tiles in enumerate(matrix):
+        for tile_x, tile_dict in enumerate(list_of_tiles):
+            shortened_height_tile = tile_dict['tile'][1:-1]
+            for tile_line_index_within_tile, tile_line in enumerate(shortened_height_tile):
+                shortened_length_tile_line = tile_line[1:-1]
                 try:
-                    final_index = tile_index * len(cleaned_tile_line) + i - 1
-                    final_image[final_index].extend(cleaned_tile_line)
-                except:
-                    final_image.append(cleaned_tile_line)
+                    final_index = tile_y * len(shortened_height_tile) + tile_line_index_within_tile
+                    final_image[final_index].extend(shortened_length_tile_line)
+                except Exception as e:
+                    final_image.append(shortened_length_tile_line)
     return final_image
 
 
@@ -211,10 +213,10 @@ def part2(data):
             image_matrix[y][x] = {'tileid': current_tileid,
                                   'tile': get_adapted_tile(left_tile_right_pattern, 1, tiles[current_tileid])}
 
-    test_image_matrix = get_test_image_matrix()
+    #test_image_matrix = get_test_image_matrix()
     # fuse is all together in one big list, remove the borders
 
-    final_image = get_final_image(test_image_matrix)
+    final_image = get_final_image(image_matrix)
 
     monster_list = [list(line) for line in monster.split('\n')]
     possible_monsters = []
@@ -258,12 +260,12 @@ def part2(data):
 
     # TEST
 
-    test_image = [list(line) for line in open('inputs/20test_img.txt').read().splitlines()]
-    for i, line in enumerate(final_image):
-        for j, c in enumerate(line):
-            if test_image[i][j] != c:
-                raise Exception
-    print(get_water_roughness(test_image))
+    # test_image = [list(line) for line in open('inputs/20test_img.txt').read().splitlines()]
+    # for i, final_image_line in enumerate(final_image):
+    #     for j, c in enumerate(final_image_line):
+    #         if test_image[i][j] != c:
+    #             raise Exception
+    # print(get_water_roughness(test_image))
 
     # (because we cannot know if we have to correct orientation or side)
     # is it possible that monster patterns overlap ?
@@ -273,7 +275,7 @@ def part2(data):
     return get_water_roughness(final_image)
 
 
-# 1388 too low
+# 2148 too low
 # 2530 too high
 if __name__ == '__main__':
     DAY = 20
