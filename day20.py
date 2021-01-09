@@ -231,32 +231,36 @@ def part2(data):
     monster_size = len([1 for c in monster if c == '#'])
 
     def detect_monster(x, y, monster, image):
+        strike_coords = []
         for m_y in range(len(monster)):
             for m_x in range(len(monster[m_y])):
                 try:
-                    if monster[m_y][m_x] == '#' and image[y+m_y][x+m_x] != '#':
-                        return False
+                    if monster[m_y][m_x] == '#':
+                        if image[y+m_y][x+m_x] == '#':
+                            strike_coords.append((x+m_x, y+m_y))
+                        else:
+                            return False
                 except:
                     return False
         print('monster at', x, y)
-        return True
+        return strike_coords
 
     def get_water_roughness(image):
-        monster_count = 0
+        coords_set = set()
         sharp_count = 0
         for y, line in enumerate(image):
             for x, _ in enumerate(line):
                 found_monster = False
                 for monster in possible_monsters:
-                    if detect_monster(x, y, monster, image):
-                        found_monster = True
+                    strike_coords = detect_monster(x, y, monster, image)
+                    if strike_coords:
+                        coords_set.update(strike_coords)
                 if found_monster:
                     monster_count += 1
                 elif image[y][x] == '#':
                     sharp_count += 1
 
-        print('monster count:', monster_count)
-        return sharp_count - monster_count * monster_size
+        return sharp_count - len(coords_set)
 
     # TEST
 
@@ -275,8 +279,6 @@ def part2(data):
     return get_water_roughness(final_image)
 
 
-# 2148 too low
-# 2530 too high
 if __name__ == '__main__':
     DAY = 20
     input_data = get_input(DAY, False)
