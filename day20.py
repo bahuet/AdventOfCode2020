@@ -106,6 +106,8 @@ def flip_tile(m, axis):
             tempm[i].reverse()
     elif axis == 0:
         tempm.reverse()
+    else:
+        raise Exception
     return tempm
 
 
@@ -128,7 +130,7 @@ def get_adapted_tile(pattern, position, tile):
         pat_pos_on_tile, needs_flipping = get_pat_pos_on_tile(pattern, tile_patterns)
     # flip tile if necessary
     if needs_flipping:
-        tile = flip_tile(tile, pat_pos_on_tile % 2 + 1)
+        tile = flip_tile(tile, (pat_pos_on_tile + 1) % 2)
     return tile
 
 
@@ -182,7 +184,6 @@ def part2(data):
     final_image = []
     for line in image_matrix:
         for tile_index, tile_dict in enumerate(line):
-            final_line = []
             tile = tile_dict['tile']
             for i in range(1, len(tile) - 1):
                 cleaned_tile_line = tile[i][1:-1]
@@ -236,15 +237,15 @@ def part2(data):
         return sharp_count - monster_count * monster_size
 
     # TEST
-    #test_image = [list(line) for line in open('inputs/20test_img.txt').read().splitlines()]
-    #print(get_water_roughness(test_image))
+    test_image = [list(line) for line in open('inputs/20test_img.txt').read().splitlines()]
+    print(get_water_roughness(test_image))
 
     # (because we cannot know if we have to correct orientation or side)
     # is it possible that monster patterns overlap ?
     # if not, we can just count the number of '#' in the pattern and add them up
     # if yes, we'll have to do something else, we'll see later
     # gl
-    # return get_water_roughness(final_image)
+    return get_water_roughness(final_image)
 
 
 # 1388 too low
