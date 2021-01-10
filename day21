@@ -1,0 +1,37 @@
+import os.path
+import re
+
+
+def get_input(day, bTest=False):
+    filename = str(day) + ('test' if bTest else '') + '.txt'
+    input_path = os.path.join('inputs', filename)
+    with open(input_path) as f:
+        lines = f.read().splitlines()
+        return lines
+
+
+def parse_input(data):
+    output = []
+    regex = r'^(.+) \(contains (.+)\)$'
+    for line in data:
+        match = re.match(regex, line)
+        output.append({'ingredients': match[1].split(' '),
+                       'allergens': match[2].split(', ')})
+    return output
+
+
+def part1(data):
+    print('1')
+    pass
+
+
+def part2(data):
+    pass
+
+
+if __name__ == '__main__':
+    DAY = 21
+    input_data = get_input(DAY, False)
+    parsed_data = parse_input(input_data)
+    print(part1(parsed_data))
+    print(part2(parsed_data))
