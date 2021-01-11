@@ -19,10 +19,22 @@ def parse_input(data):
                        'allergens': match[2].split(', ')})
     return output
 
+def get_possible_matches(data):
+    matches = {}
+    for entry in data:
+        for allergen_name in entry['allergens']:
+            matches[allergen_name] =  matches[allergen_name]&set(entry['ingredients']) if matches.get(allergen_name) else set(entry['ingredients'])
+    return matches
 
 def part1(data):
-    print('1')
-    pass
+    m = get_possible_matches(data)
+    all_allergens_ing = set()
+    for d in m.values():
+        all_allergens_ing = all_allergens_ing | d
+    counter = 0
+    for entry in data:
+        counter += len([ing for ing in entry['ingredients'] if ing not in all_allergens_ing])
+    return counter
 
 
 def part2(data):
