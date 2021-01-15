@@ -74,7 +74,7 @@ class LinkedList:
             destination_cup_node = self.get_node_by_value(destination_cup_value)
         return destination_cup_node
 
-    def play(self):
+    def play(self, p2=False):
         removed_cups = self.remove_n_nodes_after_head(3)
         destination_cup = self.get_destination_cup()
         insert_after = destination_cup
@@ -83,8 +83,8 @@ class LinkedList:
             insert_after = cup
         self.head = self.head.next
 
-    def play_n_time(self, n):
-        for _ in range(n):
+    def play_n_times(self, n):
+        for i in range(n):
             self.play()
 
     def get_values(self):
@@ -104,14 +104,26 @@ class LinkedList:
         return ''.join([str(x) for x in lst])
 
 
-
 def part1(data):
     cups = LinkedList(data)
-    cups.play_n_time(100)
+    cups.play_n_times(100)
     return cups.get_result()
 
 
 def part2(data):
+    # after the first few rounds, when we get the max +1, the destination cup will never be ahead. (at least not for 1 million rounds)
+    # in fact, it will always add the 3 cups right after the last 3 cups, because the new destination cup will always be the 3rd cup of last time
+    # so I think the two nodes after 1 will not change at all until 1 million is reached.
+    # maybe we could just keep an index of where the insertions began, a count, and a current max/
+    # what happens when we go over after 1 mil ?
+    # well hmm
+    # [2,1,X,3] => {[1,X4,X5]}, [2, X, 3] -> [2, X, 1, X4, X5, 3]
+    # as soon as we reach the X, the 3 nodes will be put after the biggest available X that is already out, similar to the first one.
+    #  
+    # what about a magic node
+    # when we call remove_n_nodes_after_head on it it would create a new node
+    # when next is called on it it just increments its internal range, only give back the head after the mil.
+    
     pass
 
 
