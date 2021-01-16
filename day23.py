@@ -16,10 +16,13 @@ class Node:
 
 class LinkedList:
     def __init__(self, val_list):
+        self.record = [None] * (len(val_list) + 1)
+        self.removed_cups = []
         self.head = None
         prev_node = None
         for val in val_list:
             new_node = Node(val)
+            self.record[val] = new_node
             if not self.head:
                 self.head = new_node
             if prev_node:
@@ -37,6 +40,12 @@ class LinkedList:
         node.next = node.next.next
         return node_to_remove
 
+    def remove_n_nodes_after_head(self, n):
+        removed_nodes = []
+        for _ in range(n):
+            removed_nodes.append(self.remove_node_after(self.head))
+        return removed_nodes
+
     def get_node_by_value(self, value):
         current_node = self.head
         while True:
@@ -45,46 +54,55 @@ class LinkedList:
             current_node = current_node.next
             if current_node is self.head:
                 break
-        return None
 
-    def remove_n_nodes_after_head(self, n):
-        removed_nodes = []
-        for _ in range(n):
-            removed_nodes.append(self.remove_node_after(self.head))
-        return removed_nodes
+    # def get_highest_value(self):
+    #     max_val = -1
+    #     current_node = self.head
+    #     while True:
+    #         if current_node.value > max_val:
+    #             max_val = current_node.value
+    #         current_node = current_node.next
+    #         if current_node is self.head:
+    #             break
+    #     return max_val
 
-    def get_highest_value(self):
-        max_val = -1
-        current_node = self.head
-        while True:
-            if current_node.value > max_val:
-                max_val = current_node.value
-            current_node = current_node.next
-            if current_node is self.head:
-                break
-        return max_val
+    # def get_highest_available_cup(self, val):
+    #     for i in range(4):
+    #         if val < -1:
+    #             val = len(self.record) - 1
+    #         if val in self.removed_cups:
+    #             val -= 1
+    #         else:
+    #             return self.record(val)
+    #     raise Exception
 
     def get_destination_cup(self):
         destination_cup_value = self.head.value
-        destination_cup_node = None
-        while not destination_cup_node:
+        for i in range(4):
             destination_cup_value -= 1
-            if destination_cup_value < 1:
-                destination_cup_value = self.get_highest_value()
-            destination_cup_node = self.get_node_by_value(destination_cup_value)
-        return destination_cup_node
 
-    def play(self, p2=False):
-        removed_cups = self.remove_n_nodes_after_head(3)
+            if destination_cup_value < 1:
+                destination_cup_value = len(self.record) - 1
+
+            candidate = self.record[destination_cup_value]
+            if candidate in self.removed_cups:
+                continue
+            else:
+                return candidate
+        raise Exception
+
+    def play(self):
+        self.removed_cups = self.remove_n_nodes_after_head(3)
         destination_cup = self.get_destination_cup()
         insert_after = destination_cup
-        for cup in removed_cups:
+        for cup in self.removed_cups:
             self.insert_node_after(insert_after, cup)
             insert_after = cup
+        self.removed_cups = []
         self.head = self.head.next
 
     def play_n_times(self, n):
-        for i in range(n):
+        for _ in range(n):
             self.play()
 
     def get_values(self):
@@ -111,20 +129,13 @@ def part1(data):
 
 
 def part2(data):
-    # after the first few rounds, when we get the max +1, the destination cup will never be ahead. (at least not for 1 million rounds)
-    # in fact, it will always add the 3 cups right after the last 3 cups, because the new destination cup will always be the 3rd cup of last time
-    # so I think the two nodes after 1 will not change at all until 1 million is reached.
-    # maybe we could just keep an index of where the insertions began, a count, and a current max/
-    # what happens when we go over after 1 mil ?
-    # well hmm
-    # [2,1,X,3] => {[1,X4,X5]}, [2, X, 3] -> [2, X, 1, X4, X5, 3]
-    # as soon as we reach the X, the 3 nodes will be put after the biggest available X that is already out, similar to the first one.
-    #  
-    # what about a magic node
-    # when we call remove_n_nodes_after_head on it it would create a new node
-    # when next is called on it it just increments its internal range, only give back the head after the mil.
-    
-    pass
+    data_copy = data[:]
+    for i in range(max(data_copy) + 1, 1000000 + 1):
+        data_copy.append(i)
+    cups = LinkedList(data_copy)
+    cups.play_n_times(10000000)
+    cup_1 = cups.record[1]
+    return cup_1.next.value * cup_1.next.next.value
 
 
 if __name__ == '__main__':
