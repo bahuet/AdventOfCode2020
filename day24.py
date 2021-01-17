@@ -82,8 +82,6 @@ def part1(data):
         tile = floor.get_existing_tile(tile)
         tile.flip_color()
     return floor.get_black_count()
-# 385 too high
-# 337 too low
 
 
 def part2(data):
