@@ -1,5 +1,6 @@
 import os.path
 import re
+from itertools import permutations
 
 
 def get_input(day, bTest=False):
@@ -99,19 +100,15 @@ class Floor:
             return True
         return False
 
-    def get_adj_tiles_coords(self, x,y,z):
-
+    def get_adj_tiles_coords(self, x, y, z):
+        ps = permutations(range(-1, 2), 3)
+        return [[x + p[0], y + [1], z + p[2]] for p in ps]
 
     def get_adj_tiles_black_count(self, x, y, z):
         bcount = 0
-        for x_probe in range(x - 1, x + 2):
-            for y_probe in range(y - 1, y + 2):
-                for z_probe in range(z - 1, z + 2):
-                    if x_probe == x and y_probe == y and z_probe == z:
-                        continue
-                    if self.is_black(x_probe, y_probe, z_probe):
-                        bcount += 1
-        print(bcount)
+        for x_probe, y_probe, z_probe in self.get_adj_tiles_coords(x,y,z):
+            if self.is_black(x_probe, y_probe, z_probe):
+                bcount += 1
         return bcount
 
     def should_flip(self, is_white, bcount):
