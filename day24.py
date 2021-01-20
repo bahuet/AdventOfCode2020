@@ -29,6 +29,18 @@ class Tile:
         self.z = z
         self.white = True
         self.will_flip = False
+        self.directions = [
+            (+1, -1, 0), (+1, 0, -1), (0, +1, -1),
+            (-1, +1, 0), (-1, 0, +1), (0, -1, +1),
+        ]
+        self.translate_table = {
+            'e': 0,
+            'w': 3,
+            'ne': 1,
+            'sw': 4,
+            'nw': 2,
+            'se': 5
+        }
 
     def flip_color(self):
         self.white = not self.white
@@ -37,25 +49,11 @@ class Tile:
         for move in moves:
             self.move(move)
 
-    def move(self, direction):
-        if direction == 'e':
-            self.x += 1
-            self.y -= 1
-        elif direction == 'w':
-            self.x -= 1
-            self.y += 1
-        elif direction == 'ne':
-            self.x += 1
-            self.z -= 1
-        elif direction == 'sw':
-            self.x -= 1
-            self.z += 1
-        elif direction == 'nw':
-            self.y += 1
-            self.z -= 1
-        elif direction == 'se':
-            self.y -= 1
-            self.z += 1
+    def move(self, cardinal_dir):
+        move_values = self.directions[self.translate_table[cardinal_dir]]
+        self.x += move_values[0]
+        self.y += move_values[1]
+        self.z += move_values[2]
 
 
 class Floor:
@@ -87,7 +85,9 @@ class Floor:
         if radius == 0:
             return [[0, 0, 0]]
         ps = permutations(range(-radius, radius+1), 3)
-        return [[p[0], p[1], p[2]] for p in ps if sum(p) == 0 and radius == max(-1*min(p), max(p))]
+        tiles_ring = [[p[0], p[1], p[2]] for p in ps if sum(p) == 0 and sum(abs(x) for x in p) == radius*2]
+
+        return tiles_ring
 
     def get_adj_tiles_coords(self, x, y, z):
         return [[x + p[0], y + p[1], z + p[2]] for p in self.get_tiles_ring(1)]
@@ -120,7 +120,6 @@ class Floor:
         check_count = 0
         for r in range(max_r + 2):
             ring_tiles = self.get_tiles_ring(r)
-            print('len(ring_tiles): ', len(ring_tiles))
             for x, y, z in ring_tiles:
                 check_count += 1
                 bcount = self.get_adj_tiles_black_count(x, y, z)
