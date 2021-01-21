@@ -1,6 +1,5 @@
 import os.path
 import re
-from itertools import permutations
 
 
 def get_input(day, bTest=False):
@@ -20,6 +19,12 @@ def parse_input(data):
     return out
 
 
+DIRECTIONS = [
+    (+1, -1, 0), (+1, 0, -1), (0, +1, -1),
+    (-1, +1, 0), (-1, 0, +1), (0, -1, +1),
+]
+
+
 class Tile:
     """A tile represented with cube coordinates"""
 
@@ -29,10 +34,7 @@ class Tile:
         self.z = z
         self.white = True
         self.will_flip = False
-        self.directions = [
-            (+1, -1, 0), (+1, 0, -1), (0, +1, -1),
-            (-1, +1, 0), (-1, 0, +1), (0, -1, +1),
-        ]
+
         self.translate_table = {
             'e': 0,
             'w': 3,
@@ -46,11 +48,14 @@ class Tile:
         self.white = not self.white
 
     def consume_serie_of_moves(self, moves):
-        for move in moves:
-            self.move(move)
+        for cardinal_move in moves:
+            self.cardinal_move(cardinal_move)
 
-    def move(self, cardinal_dir):
-        move_values = self.directions[self.translate_table[cardinal_dir]]
+    def cardinal_move(self, cardinal_dir):
+        self.move(self.translate_table[cardinal_dir])
+
+    def move(self, index):
+        move_values = DIRECTIONS[index]
         self.x += move_values[0]
         self.y += move_values[1]
         self.z += move_values[2]
@@ -81,12 +86,19 @@ class Floor:
             return True
         return False
 
+    def get_tile_neighbor(self, tile_coords, direction):
+        move_vals = DIRECTIONS[direction]
+        return tuple(tile_coords[i]+move_vals[i] for i in range(3))
+
     def get_tiles_ring(self, radius):
         if radius == 0:
-            return [[0, 0, 0]]
-        ps = permutations(range(-radius, radius+1), 3)
-        tiles_ring = [[p[0], p[1], p[2]] for p in ps if sum(p) == 0 and sum(abs(x) for x in p) == radius*2]
-
+            return [(0, 0, 0)]
+        tiles_ring = []
+        tile_coords = (-radius, 0, radius)  # this is the starting position that works with the order of directions
+        for i in range(6):
+            for j in range(radius):
+                tiles_ring.append(tile_coords)
+                tile_coords = self.get_tile_neighbor(tile_coords, i)
         return tiles_ring
 
     def get_adj_tiles_coords(self, x, y, z):
@@ -107,16 +119,12 @@ class Floor:
         return False
 
     def apply_flipping(self):
-        count = 0
         for tile in self.hm.values():
             if tile.will_flip:
                 tile.flip_color()
-                count += 1
-        # print(count)
 
     def do_art(self):
         max_r = self.get_max_radius()
-        print('max_r: ', max_r)
         check_count = 0
         for r in range(max_r + 2):
             ring_tiles = self.get_tiles_ring(r)
@@ -128,7 +136,6 @@ class Floor:
                 if flip:
                     flip = self.get_tile_if_exists(Tile(x, y, z))
                     flip.will_flip = True
-        print('check_count:', check_count)
         self.apply_flipping()
 
 
@@ -144,7 +151,7 @@ def part1(data):
 
 
 def part2(floor):
-    for i in range(100):
+    for i in range(10):
         floor.do_art()
         print('Day ', i+1, ': ', floor.get_black_count())
     return floor.get_black_count()
