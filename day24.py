@@ -64,11 +64,16 @@ class Tile:
 class Floor:
     def __init__(self):
         self.hm = {}
+        self.max_radius = 0
 
     def get_tile_key(self, x, y, z):
         return str(x) + '#' + str(y) + '#' + str(z)
 
     def get_tile_if_exists(self, tile):
+        c = (tile.x, tile.y, tile.z)
+        local_max = max(max(c), abs(min(c)))
+        if local_max > self.max_radius:
+            self.max_radius = local_max
         key = self.get_tile_key(tile.x, tile.y, tile.z)
         if key not in self.hm:
             self.hm[key] = tile
@@ -76,9 +81,6 @@ class Floor:
 
     def get_black_count(self):
         return len([x for x in self.hm.values() if not x.white])
-
-    def get_max_radius(self):
-        return max([max(tile.x, tile.y, tile.z) for tile in self.hm.values()])
 
     def is_black(self, x, y, z):
         key = self.get_tile_key(x, y, z)
@@ -96,17 +98,17 @@ class Floor:
         tiles_ring = []
         tile_coords = (-radius, 0, radius)  # this is the starting position that works with the order of directions
         for i in range(6):
-            for j in range(radius):
+            for _ in range(radius):
                 tiles_ring.append(tile_coords)
                 tile_coords = self.get_tile_neighbor(tile_coords, i)
         return tiles_ring
 
-    def get_adj_tiles_coords(self, x, y, z):
-        return [[x + p[0], y + p[1], z + p[2]] for p in self.get_tiles_ring(1)]
+    def get_adj_tiles_coords(self, coords):
+        return [tuple(coords[i] + p[i] for i in range(3)) for p in self.get_tiles_ring(1)]
 
-    def get_adj_tiles_black_count(self, x, y, z):
+    def get_adj_tiles_black_count(self, coords):
         bcount = 0
-        for x_probe, y_probe, z_probe in self.get_adj_tiles_coords(x, y, z):
+        for x_probe, y_probe, z_probe in self.get_adj_tiles_coords(coords):
             if self.is_black(x_probe, y_probe, z_probe):
                 bcount += 1
         return bcount
@@ -119,18 +121,24 @@ class Floor:
         return False
 
     def apply_flipping(self):
+        flip_to_black = 0
+        flip_to_white = 0
         for tile in self.hm.values():
             if tile.will_flip:
                 tile.flip_color()
+                if tile.white:
+                    flip_to_white += 1
+                else:
+                    flip_to_black += 1
+
+        print('tiles count: ', len(self.hm.values()), ', flip to white: ', flip_to_white, ', flip to black:', flip_to_black)
 
     def do_art(self):
-        max_r = self.get_max_radius()
-        check_count = 0
+        max_r = self.max_radius
         for r in range(max_r + 2):
             ring_tiles = self.get_tiles_ring(r)
             for x, y, z in ring_tiles:
-                check_count += 1
-                bcount = self.get_adj_tiles_black_count(x, y, z)
+                bcount = self.get_adj_tiles_black_count((x, y, z))
                 is_white = not self.is_black(x, y, z)
                 flip = self.should_flip(is_white, bcount)
                 if flip:
@@ -153,7 +161,7 @@ def part1(data):
 def part2(floor):
     for i in range(10):
         floor.do_art()
-        print('Day ', i+1, ': ', floor.get_black_count())
+        print('Day ', i+1, ': ', floor.get_black_count(), ' tiles are black.')
     return floor.get_black_count()
 
 # 464 too low.
