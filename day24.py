@@ -28,22 +28,25 @@ DIRECTIONS = [
 class Tile:
     """A tile represented with cube coordinates"""
 
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__(self, coords):
+        self.x = coords[0]
+        self.y = coords[1]
+        self.z = coords[2]
         self.white = True
         self.will_flip = False
 
         self.translate_table = {
             'e': 0,
-            'w': 3,
             'ne': 1,
-            'sw': 4,
             'nw': 2,
+            'w': 3,
+            'sw': 4,
             'se': 5
         }
-
+        
+    def get_coords_tuple(self):
+        return (self.x, self.y, self.z)
+    
     def flip_color(self):
         self.white = not self.white
 
@@ -66,15 +69,15 @@ class Floor:
         self.hm = {}
         self.max_radius = 0
 
-    def get_tile_key(self, x, y, z):
-        return str(x) + '#' + str(y) + '#' + str(z)
+    def get_tile_key(self, c):
+        return str(c[0]) + '#' + str(c[1]) + '#' + str(c[2])
 
     def get_tile_if_exists(self, tile):
-        c = (tile.x, tile.y, tile.z)
+        c = get_coords_tuple()
         local_max = max(max(c), abs(min(c)))
         if local_max > self.max_radius:
             self.max_radius = local_max
-        key = self.get_tile_key(tile.x, tile.y, tile.z)
+        key = self.get_tile_key(c)
         if key not in self.hm:
             self.hm[key] = tile
         return self.hm[key]
@@ -82,9 +85,9 @@ class Floor:
     def get_black_count(self):
         return len([x for x in self.hm.values() if not x.white])
 
-    def is_black(self, x, y, z):
-        key = self.get_tile_key(x, y, z)
-        if self.hm.get(key) and not self.hm.get(key).white:
+    def is_black(self, coords):
+        key = self.get_tile_key(coords)
+        if key in self.hm and not self.hm.get(key).white:
             return True
         return False
 
@@ -108,8 +111,8 @@ class Floor:
 
     def get_adj_tiles_black_count(self, coords):
         bcount = 0
-        for x_probe, y_probe, z_probe in self.get_adj_tiles_coords(coords):
-            if self.is_black(x_probe, y_probe, z_probe):
+        for probe in self.get_adj_tiles_coords(coords):
+            if self.is_black(probe):
                 bcount += 1
         return bcount
 
@@ -121,29 +124,25 @@ class Floor:
         return False
 
     def apply_flipping(self):
-        flip_to_black = 0
-        flip_to_white = 0
         for tile in self.hm.values():
             if tile.will_flip:
                 tile.flip_color()
-                if tile.white:
-                    flip_to_white += 1
-                else:
-                    flip_to_black += 1
 
-        print('tiles count: ', len(self.hm.values()), ', flip to white: ', flip_to_white, ', flip to black:', flip_to_black)
 
-    def do_art(self):
+    def mark_for_flipping(self):
         max_r = self.max_radius
         for r in range(max_r + 2):
             ring_tiles = self.get_tiles_ring(r)
-            for x, y, z in ring_tiles:
-                bcount = self.get_adj_tiles_black_count((x, y, z))
-                is_white = not self.is_black(x, y, z)
+            for coords in ring_tiles:
+                bcount = self.get_adj_tiles_black_count(coords)
+                is_white = not self.is_black(coords)
                 flip = self.should_flip(is_white, bcount)
                 if flip:
-                    flip = self.get_tile_if_exists(Tile(x, y, z))
+                    flip = self.get_tile_if_exists(Tile(coords))
                     flip.will_flip = True
+                    
+    def do_art(self):
+        self.mark_for_flipping()
         self.apply_flipping()
 
 
@@ -151,7 +150,7 @@ def part1(data):
     dirs = parse_input(data)
     floor = Floor()
     for dir_line in dirs:
-        tile = Tile(0, 0, 0)
+        tile = Tile((0,0,0))
         tile.consume_serie_of_moves(dir_line)
         tile = floor.get_tile_if_exists(tile)
         tile.flip_color()
@@ -161,7 +160,6 @@ def part1(data):
 def part2(floor):
     for i in range(10):
         floor.do_art()
-        print('Day ', i+1, ': ', floor.get_black_count(), ' tiles are black.')
     return floor.get_black_count()
 
 # 464 too low.
