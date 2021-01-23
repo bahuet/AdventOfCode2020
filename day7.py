@@ -68,7 +68,7 @@ def recurbags(bag, bags, count):
             counter += times * (1 + recurbags(sub_bag, bags, count))
         return counter
 
-
+ 
 if __name__ == '__main__':
     input_data = get_input(7)
     print(part1(input_data))
