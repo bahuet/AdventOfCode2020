@@ -74,12 +74,12 @@ class Floor:
 
     def get_tile_if_exists(self, tile):
         c = get_coords_tuple()
-        local_max = max(max(c), abs(min(c)))
-        if local_max > self.max_radius:
-            self.max_radius = local_max
         key = self.get_tile_key(c)
         if key not in self.hm:
             self.hm[key] = tile
+            local_max = max(max(c), abs(min(c)))
+            if local_max > self.max_radius:
+            self.max_radius = local_max
         return self.hm[key]
 
     def get_black_count(self):
