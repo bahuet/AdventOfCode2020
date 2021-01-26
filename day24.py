@@ -73,7 +73,7 @@ class Floor:
         return str(c[0]) + '#' + str(c[1]) + '#' + str(c[2])
 
     def get_tile_if_exists(self, tile):
-        c = get_coords_tuple()
+        c = tile.get_coords_tuple()
         key = self.get_tile_key(c)
         if key not in self.hm:
             self.hm[key] = tile
