@@ -43,10 +43,10 @@ class Tile:
             'sw': 4,
             'se': 5
         }
-        
+
     def get_coords_tuple(self):
         return (self.x, self.y, self.z)
-    
+
     def flip_color(self):
         self.white = not self.white
 
@@ -79,7 +79,7 @@ class Floor:
             self.hm[key] = tile
             local_max = max(max(c), abs(min(c)))
             if local_max > self.max_radius:
-            self.max_radius = local_max
+                self.max_radius = local_max
         return self.hm[key]
 
     def get_black_count(self):
@@ -127,20 +127,19 @@ class Floor:
         for tile in self.hm.values():
             if tile.will_flip:
                 tile.flip_color()
-
+                tile.will_flip = False
 
     def mark_for_flipping(self):
-        max_r = self.max_radius
-        for r in range(max_r + 2):
+        for r in range(self.max_radius + 2):
             ring_tiles = self.get_tiles_ring(r)
             for coords in ring_tiles:
                 bcount = self.get_adj_tiles_black_count(coords)
                 is_white = not self.is_black(coords)
                 flip = self.should_flip(is_white, bcount)
                 if flip:
-                    flip = self.get_tile_if_exists(Tile(coords))
-                    flip.will_flip = True
-                    
+                    tile = self.get_tile_if_exists(Tile(coords))
+                    tile.will_flip = True
+
     def do_art(self):
         self.mark_for_flipping()
         self.apply_flipping()
@@ -150,7 +149,7 @@ def part1(data):
     dirs = parse_input(data)
     floor = Floor()
     for dir_line in dirs:
-        tile = Tile((0,0,0))
+        tile = Tile((0, 0, 0))
         tile.consume_serie_of_moves(dir_line)
         tile = floor.get_tile_if_exists(tile)
         tile.flip_color()
@@ -158,17 +157,15 @@ def part1(data):
 
 
 def part2(floor):
-    for i in range(10):
+    for i in range(100):
+        #print(f"Day {i}: {floor.get_black_count()}")
         floor.do_art()
     return floor.get_black_count()
-
-# 464 too low.
-# 12412 too high.
 
 
 if __name__ == '__main__':
     DAY = 24
-    input_data = get_input(DAY, True)
+    input_data = get_input(DAY, False)
     p1_floor = part1(input_data)
     print(p1_floor.get_black_count())
     print(part2(p1_floor))
