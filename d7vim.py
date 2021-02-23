@@ -1,4 +1,5 @@
 import re
+from functools import lru_cache
 from collections import defaultdict 
 d = open('inputs/7.txt').read().splitlines()
 inner_exp = re.compile(r'(\d+) ([\w ]+) bags?[,.]')
@@ -16,11 +17,11 @@ def count_can_contain(G, src, visited=set()):
         count_can_contain(G, color, visited)
     return len(visited)
 print(count_can_contain(contained_by, 'shiny gold'))
-def count_contained(G, src):
+@lru_cache(maxsize=None)
+def count_contained(src):
     t = 0
-    for qty, color in G[src]:
-        t += qty
-        t += qty * count_contained(G, color)
+    for qty, color in contains[src]:
+        t += qty * (1 +  count_contained(color))
     return t
-print(count_contained(contains, 'shiny gold'))
+print(count_contained('shiny gold'))
 
