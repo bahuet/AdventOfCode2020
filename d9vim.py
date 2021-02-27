@@ -12,3 +12,22 @@ for i, v in enumerate(d[25:], 25):
     if not two_sum(d[i-25:i], v):
         break
 print(v)
+start = 0
+end = 0 
+curr_sum = 0
+while curr_sum != v:
+    if curr_sum < v:
+        curr_sum += d[end]
+        end += 1
+    elif curr_sum > v:
+        curr_sum -= d[start]
+        start += 1
+
+min_ =  max_ = d[start]
+for i in range(start, end):
+    if d[i] > max_:
+        max_ = d[i]
+    if d[i] < min_:
+        min_ = d[i]
+
+print(min_ + max_)
