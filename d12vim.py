@@ -28,5 +28,14 @@ for cmd, n in d:
         x, y = MOVEMAP[cmd](x, y, n)
 print(abs(x) + abs(y))
 
-
-
+x, y = 0, 0
+dx, dy = 10, 1 
+for cmd, n in d:
+    if cmd == FORWARD:
+        x += dx * n
+        y += dy * n
+    elif cmd == LEFT or cmd == RIGHT:
+        dx, dy = ROTMAN[(cmd, n)](dx, dy)
+    else:
+        dx, dy = MOVEMAP[cmd](dx, dy, n)
+print(abs(x) + abs(y))
