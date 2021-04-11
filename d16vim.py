@@ -19,3 +19,22 @@ for ticket in nearby_tickets:
     for f in invalid_fields(ticket):
         count += f
 print(count)
+def ticket_is_valid(ticket):
+    return all(any(v in rng for rng in ranges) for v in ticket)
+possible = [set(range(len(your_ticket))) for _ in range(len(ranges))] # list of sets of all possible real positions for each range field.
+for ticket in filter(ticket_is_valid, nearby_tickets):
+    for poss, rng in zip(possible, ranges):
+        for i, value in enumerate(ticket):
+            if value not in rng:
+                poss.discard(i)
+assigned = [None] * len(possible)
+while any(possible):
+    for i, poss in enumerate(possible):
+        if len(poss) == 1:
+            assigned[i] = match =  poss.pop()
+            break
+    for poss in possible:
+        poss.discard(match)
+from math import prod
+print(assigned)
+print(prod(your_ticket[i] for i in assigned[:6] ))
